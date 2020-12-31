@@ -10,6 +10,7 @@ class UserController {
 
     async getUsers(req, res) {
         const newUser = await db.query(`SELECT * FROM users`);
+        console.log(newUser);
         res.json(newUser.rows);
     }
 
