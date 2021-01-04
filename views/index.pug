@@ -3,3 +3,10 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
+  p #{message}
+  div(id='messanges')
+
+  form(id='action')
+    input(id='action-input') 
+    button(id='action-btn' value='send') send
+
