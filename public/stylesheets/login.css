@@ -1,0 +1,40 @@
+.login {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 5px;
+  background-color: beige;
+  -webkit-box-shadow: 5px 5px 15px 5px rgba(0, 0, 0, 0.39);
+  box-shadow: 5px 5px 15px 5px rgba(0, 0, 0, 0.39);
+  padding: 8px;
+}
+
+.login__block {
+  display: flex;
+  column-gap: 5px;
+}
+.login__block_text-crate-form,
+.login__block_text-login-form {
+  cursor: pointer;
+}
+.login__block_text-crate-form:hover,
+.login__block_text-login-form:hover {
+  text-decoration: underline;
+}
+
+.active-login-block {
+  background-color: black;
+  color: aliceblue;
+}
+
+.login__crate-form,
+.login__login-form {
+  display: none;
+}
+
+.active-form {
+  display: block;
+}

@@ -1,21 +1,24 @@
 const socket = io();
-let el;
 
-document.querySelector('form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const input =  e.target.childNodes[0];
-    socket.emit('broadcast', input.value);
+console.log(123123123);
+let question = 'Введите ваш ник!';
+let nik = prompt(question);
+
+
+document.querySelector('.login__crate-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input =  e.target.childNodes[0];
+  socket.emit('broadcast', input.value);
   input.value = '';
 })
 
 socket.on('connect', () => {
-  // console.log(socket); // x8WIv7-mJelg7on_ALbx
+  socket.emit('name', nik);
 });
 
 socket.on('broadcast', (...msg) => {
-  console.log(msg);
-    document.querySelector('#messanges').innerHTML += `<p>${msg}</p>`;
-    // window.scrollTo(0, document.body.scrollHeight);
+  document.querySelector('#messanges').innerHTML += `<p>${msg[0]}: ${msg[1]}</p>`;
+  // window.scrollTo(0, document.body.scrollHeight);
 });
 
 
