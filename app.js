@@ -17,7 +17,10 @@ app.use('/users', userRouter);
 app.use('/client', clientRouter);
 
 const server = require('http').createServer(app);
-const options = { /* ... */ };
+const options = {
+ cors:true,
+//  origins:["https://rsclone-node-js.herokuapp.com/"],
+};
 const io = require('socket.io')(server, options);
 
 const users = new Map();
