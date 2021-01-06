@@ -16,11 +16,11 @@ app.use('/', mainRouter);
 app.use('/users', userRouter);
 app.use('/client', clientRouter);
 
-const server = require('https').createServer(app);
+const server = require('http').createServer(app);
 const options = {
     cors: true,
     methods: ["GET", "POST"],
- origins:["https://rsclone-node-js.herokuapp.com/"],
+    origins:["https://rsclone-node-js.herokuapp.com/"],
 };
 const io = require('socket.io')(server, options);
 
