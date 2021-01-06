@@ -19,7 +19,7 @@ app.use('/client', clientRouter);
 const server = require('https').createServer(app);
 const options = {
  cors:true,
-//  origins:["https://rsclone-node-js.herokuapp.com/"],
+ origins:["https://rsclone-node-js.herokuapp.com/"],
 };
 const io = require('socket.io')(server, options);
 
