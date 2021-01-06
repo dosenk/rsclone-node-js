@@ -16,7 +16,7 @@ app.use('/', mainRouter);
 app.use('/users', userRouter);
 app.use('/client', clientRouter);
 
-const server = require('http').createServer(app);
+const server = require('https').createServer(app);
 const options = {
  cors:true,
 //  origins:["https://rsclone-node-js.herokuapp.com/"],
@@ -27,14 +27,17 @@ const users = new Map();
 
 io.on('connection', socket => { 
     socket.on("broadcast", (args) => {
+        console.log(args);
         io.emit("broadcast", users.get(socket.client.id), args);
     });
 
     socket.on("name", (args) => {
+        console.log(args);
         users.set(socket.client.id, args);
     });
 
     socket.on("disconnect", () => {
+        console.log('disconnect');
         users.delete(socket.client.id);
     });
 });
