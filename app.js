@@ -43,6 +43,6 @@ io.on('connection', socket => {
     });
 });
 
-server.listen(3000, () => {console.log(process.env.PORT)});
+server.listen(443, () => {console.log(process.env.PORT)});
 
 module.exports = app;
