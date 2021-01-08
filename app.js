@@ -15,7 +15,7 @@ app.use(express.json());
 app.use('/', mainRouter);
 app.use('/users', userRouter);
 app.use('/client', clientRouter);
-console.log(process.env);
+console.log(process.env.PORT, ' - port');
 const server = require('http').createServer(app);
 const options = {
     cors: true,
@@ -43,6 +43,6 @@ io.on('connection', socket => {
     });
 });
 
-server.listen(process.env.PORT, () => {console.log(process.env.PORT)});
+server.listen(3000, () => {console.log(process.env.PORT)});
 
 module.exports = app;
