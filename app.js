@@ -16,7 +16,7 @@ app.use('/', mainRouter);
 app.use('/users', userRouter);
 app.use('/client', clientRouter);
 console.log(process.env.PORT, ' - port');
-const server = require('https').createServer(app);
+const server = require('http').createServer(app);
 const options = {
     cors: true,
     methods: ["GET", "POST"],
@@ -43,6 +43,6 @@ io.on('connection', socket => {
     });
 });
 
-server.listen(443, () => {console.log(process.env.PORT)});
+server.listen(80, () => { console.log(process.env.PORT) });
 
 module.exports = app;
