@@ -9,7 +9,7 @@ const clientRouter = require('./routes/client.router');
 const app = express();
 app.use(express.static(__dirname + '/public'));
 
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
 
 // app.use('/', mainRouter);
