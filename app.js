@@ -44,6 +44,6 @@ io.on('connection', socket => {
 });
 const PORT = process.env.PORT || 3000;
 console.log(PORT, ' - port HEROKU');
-server.listen(PORT, () => { console.log(PORT, ' - listen') });
+server.listen(39287, () => { console.log(PORT, ' - listen') });
 
 module.exports = app;
