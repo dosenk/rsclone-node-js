@@ -15,7 +15,7 @@ app.use(express.json());
 app.use('/', mainRouter);
 app.use('/users', userRouter);
 app.use('/client', clientRouter);
-console.log(process.env.PORT);
+console.log(process.env);
 const server = require('http').createServer(app);
 const options = {
     cors: true,
