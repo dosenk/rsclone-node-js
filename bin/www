@@ -13,6 +13,7 @@ const http = require('http');
  */
 
 const port = normalizePort(process.env.PORT || '80');
+console.log(process.env.PORT, ' - port');
 app.set('port', port);
 
 /**

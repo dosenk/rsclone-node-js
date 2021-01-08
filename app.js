@@ -42,8 +42,8 @@ io.on('connection', socket => {
         users.delete(socket.client.id);
     });
 });
-const PORT = process.env.PORT || 3000;
-console.log(PORT, ' - port HEROKU');
-server.listen(39287, () => { console.log(PORT, ' - listen') });
+// const PORT = process.env.PORT || 3000;
+// console.log(PORT, ' - port HEROKU');
+// server.listen(39287, () => { console.log(PORT, ' - listen') });
 
 module.exports = app;
