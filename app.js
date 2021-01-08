@@ -42,7 +42,7 @@ io.on('connection', socket => {
         users.delete(socket.client.id);
     });
 });
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 3000;
 console.log(PORT, ' - port HEROKU');
 server.listen(PORT, () => { console.log(PORT, ' - listen') });
 
