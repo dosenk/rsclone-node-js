@@ -15,7 +15,7 @@ app.use(express.json());
 // app.use('/', mainRouter);
 app.use('/users', userRouter);
 app.use('/client', clientRouter);
-console.log(process.env.PORT, ' - port');
+
 const server = require('http').createServer(app);
 const options = {
     cors: true,
@@ -42,7 +42,8 @@ io.on('connection', socket => {
         users.delete(socket.client.id);
     });
 });
-
-server.listen(80, () => { console.log(process.env.PORT) });
+const PORT = process.env.PORT || 80;
+console.log(PORT, ' - port HEROKU');
+server.listen(PORT, () => { console.log(PORT, ' - listen') });
 
 module.exports = app;
