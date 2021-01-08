@@ -42,7 +42,7 @@ io.on('connection', socket => {
         users.delete(socket.client.id);
     });
 });
- 
-server.listen(80);
+
+server.listen(process.env.PORT, () => {console.log(process.env.PORT)});
 
 module.exports = app;
