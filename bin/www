@@ -5,6 +5,7 @@
  */
 
 const app = require('../app');
+const server = require('../app');
 const debug = require('debug')('src:server');
 const http = require('http');
 
@@ -16,11 +17,38 @@ const port = normalizePort(process.env.PORT || '80');
 console.log(process.env.PORT, ' - port');
 app.set('port', port);
 
+console.log(port, ' ---- port');
+
 /**
  * Create HTTP server.
  */
 
-const server = http.createServer(app);
+const server = require('http').createServer(app);
+const options = {
+    cors: true,
+    methods: ["GET", "POST"],
+    origins:["https://rsclone-node-js.herokuapp.com/"],
+};
+const io = require('socket.io')(server, options);
+
+const users = new Map();
+
+io.on('connection', socket => { 
+    socket.on("broadcast", (args) => {
+        console.log(args);
+        io.emit("broadcast", users.get(socket.client.id), args);
+    });
+
+    socket.on("name", (args) => {
+        console.log(args);
+        users.set(socket.client.id, args);
+    });
+
+    socket.on("disconnect", () => {
+        console.log('disconnect');
+        users.delete(socket.client.id);
+    });
+});
 
 /**
  * Listen on provided port, on all network interfaces.
