@@ -16,7 +16,7 @@ app.use('/', mainRouter);
 app.use('/users', userRouter);
 app.use('/client', clientRouter);
 console.log(process.env.PORT, ' - port');
-const server = require('http').createServer(app);
+const server = require('https').createServer(app);
 const options = {
     cors: true,
     methods: ["GET", "POST"],
