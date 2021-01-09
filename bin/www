@@ -5,19 +5,15 @@
  */
 
 const app = require('../app');
-// const server = require('../app');
 const debug = require('debug')('src:server');
-const http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
 const port = normalizePort(process.env.PORT || '80');
-console.log(process.env.PORT, ' - port');
-app.set('port', port);
 
-console.log(port, ' ---- port');
+app.set('port', port);
 
 /**
  * Create HTTP server.
@@ -32,23 +28,43 @@ const options = {
 const io = require('socket.io')(server, options);
 
 const users = new Map();
+const painter = [];
+let gameFlag = false;
+
 
 io.on('connection', socket => { 
+ 
     socket.on("broadcast", (args) => {
         console.log(args);
-        io.emit("broadcast", users.get(socket.client.id), args);
+        io.emit("broadcast", users.get(socket.id), args);
     });
 
     socket.on("name", (args) => {
-        console.log(args);
-        users.set(socket.client.id, args);
+      console.log(socket.id, '- socket id');
+      users.set(socket.id, args);
+      if (!gameFlag) setPainter()
+      else io.to(socket.id).emit("game", 'guesser');
     });
 
     socket.on("disconnect", () => {
-        console.log('disconnect');
-        users.delete(socket.client.id);
+        users.delete(socket.id);
     });
 });
+
+function setPainter() {
+  if (users.size > 1) {
+    let gamer = 'painter';
+    for (const userEntries of users) {
+      const socketId = userEntries[0];
+      if (painter.indexOf(socketId) === -1) {
+        painter.push(socketId);
+        gameFlag = true;
+        io.to(socketId).emit("game", gamer);
+        break;
+      }
+    }
+  }
+}
 
 /**
  * Listen on provided port, on all network interfaces.

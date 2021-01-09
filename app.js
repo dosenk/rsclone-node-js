@@ -18,8 +18,4 @@ app.use('/users', userRouter);
 app.use('/client', clientRouter);
 
 
-// const PORT = process.env.PORT || 3000;
-// console.log(PORT, ' - port HEROKU');
-// server.listen(39287, () => { console.log(PORT, ' - listen') });
-
 module.exports = app;
