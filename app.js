@@ -1,21 +1,26 @@
 // const createError = require('http-errors');
 // const logger = require('morgan');
+// import { SOCKET_SERVER_URL } from './constants/constants';
+
 const cors = require('cors');
 const express = require('express');
-// const mainRouter = require('./routes/main.router');
+
+
 const userRouter = require('./routes/user.router');
 const clientRouter = require('./routes/client.router');
+const socket = require('./controller/socket.controller');
 
-const app = express();
-app.use(express.static(__dirname + '/public'));
-
-
-app.use(cors());
-app.use(express.json());
-
-// app.use('/', mainRouter);
-app.use('/users', userRouter);
-app.use('/client', clientRouter);
+const appExpress = express();
 
 
-module.exports = app;
+appExpress.use(express.static(__dirname + '/public'));
+
+
+appExpress.use(cors());
+appExpress.use(express.json());
+
+appExpress.use('/users', userRouter);
+appExpress.use('/client', clientRouter);
+
+
+module.exports = { appExpress, socket };
