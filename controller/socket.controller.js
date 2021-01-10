@@ -24,20 +24,26 @@ class SocketController {
 
     addEventListeners() {
         this.io.on('connection', socket => { 
- 
             socket.on("broadcast", (args) => {
                 console.log(args);
                 this.io.emit("broadcast", this.users.get(socket.id), args);
             });
 
+           
+
             socket.on("name", (args) => {
-            console.log(socket.id, '- socket id');
-            this.users.set(socket.id, args);
-            if (!this.gameFlag) this.setPainter(socket.id)
-            else {
-                this.guesser.push(socket.id);
-                this.io.to(socket.id).emit("game", 'guesser');
-                }
+                console.log(socket.id, '- socket id');
+                this.users.set(socket.id, args);
+                if (!this.gameFlag) this.setPainter(socket.id)
+                else {
+                    this.guesser.push(socket.id);
+                    this.io.to(socket.id).emit("role", 'guesser');
+                    }
+            });
+
+             socket.on("coordinates", (args) => {
+                console.log(args);
+                socket.broadcast.emit("coordinates", args);
             });
 
             socket.on("disconnect", () => {
@@ -54,10 +60,10 @@ class SocketController {
         if (this.painter.indexOf(socketId) === -1) {
             this.painter.push(socketId);
             this.gameFlag = true;
-            this.io.to(socketId).emit("game", gamer);
+            this.io.to(socketId).emit("role", gamer);
         } else {
             this.guesser.push(socketId);
-            this.io.to(socketId).emit("game", 'guesser');
+            this.io.to(socketId).emit("role", 'guesser');
         }
     }
 }
