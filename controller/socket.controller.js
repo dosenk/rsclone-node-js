@@ -16,7 +16,7 @@ class SocketController {
         const options = {
             cors: true,
             methods: ["GET", "POST"],
-            origins:["https://rsclone-node-js.herokuapp.com/"],
+            origins:[CONSTANTS.SOCKET_SERVER_URL],
         };
         this.io = io(httpServer, options);
         this.addEventListeners();
@@ -32,21 +32,21 @@ class SocketController {
            
 
             socket.on("name", (args) => {
-                console.log(socket.id, '- socket id');
+                console.log(socket.id, ' - connected');
                 this.users.set(socket.id, args);
                 if (!this.gameFlag) this.setPainter(socket.id)
                 else {
                     this.guesser.push(socket.id);
-                    this.io.to(socket.id).emit("role", 'guesser');
+                    this.io.to(socket.id).emit("role", CONSTANTS.ROLE_GUESSER);
                     }
             });
 
-             socket.on("coordinates", (args) => {
-                console.log(args);
-                socket.broadcast.emit("coordinates", args);
+             socket.on("draw", (info, actionType) => {
+                socket.broadcast.emit("draw", info, actionType);
             });
 
             socket.on("disconnect", () => {
+                console.log(socket.id, ' - disconnected');
                 this.users.delete(socket.id);
                 this.painter = this.painter.filter((soketId) => soketId !== socket.id);
                 this.guesser = this.guesser.filter((soketId) => soketId !== socket.id);
@@ -56,14 +56,13 @@ class SocketController {
     }
 
     setPainter(socketId) {
-        let gamer = 'painter';
         if (this.painter.indexOf(socketId) === -1) {
             this.painter.push(socketId);
             this.gameFlag = true;
-            this.io.to(socketId).emit("role", gamer);
+            this.io.to(socketId).emit("role", CONSTANTS.ROLE_PAINTER);
         } else {
             this.guesser.push(socketId);
-            this.io.to(socketId).emit("role", 'guesser');
+            this.io.to(socketId).emit("role", CONSTANTS.ROLE_GUESSER);
         }
     }
 }
