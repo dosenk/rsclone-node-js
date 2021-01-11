@@ -7,7 +7,10 @@ class SocketController {
         this.server = server;
         this.url = url;
         this.users = new Map();
-        this.painter = [];
+        this.painter = {
+            id: null,
+            name: null,
+        };
         this.guesser = [];
         this.gameFlag = false;
     }
@@ -29,16 +32,15 @@ class SocketController {
                 this.io.emit("broadcast", this.users.get(socket.id), args);
             });
 
-           
-
-            socket.on("name", (args) => {
-                console.log(socket.id, ' - connected');
-                this.users.set(socket.id, args);
-                if (!this.gameFlag) this.setPainter(socket.id)
-                else {
-                    this.guesser.push(socket.id);
-                    this.io.to(socket.id).emit("role", CONSTANTS.ROLE_GUESSER);
-                    }
+            socket.on("usersInfo", (info, actionType) => {
+                if (actionType === CONSTANTS.NAME) {
+                    const name = info;
+                    const socketId = socket.id;
+                    this.setUserName(socketId, name)
+                    if (!this.gameFlag) this.setPainter(socketId, name)
+                    else this.setGuesser(socketId, name);
+                    this.io.emit("usersInfo", this.getUsers(), CONSTANTS.USERS);  
+                }
             });
 
              socket.on("draw", (info, actionType) => {
@@ -47,23 +49,47 @@ class SocketController {
 
             socket.on("disconnect", () => {
                 console.log(socket.id, ' - disconnected');
-                this.users.delete(socket.id);
-                this.painter = this.painter.filter((soketId) => soketId !== socket.id);
-                this.guesser = this.guesser.filter((soketId) => soketId !== socket.id);
-                if (this.painter.length === 0) this.gameFlag = false;
+                this.deleteUser(socket.id);
+                this.io.emit("usersInfo", this.getUsers(), CONSTANTS.USERS); 
             });
         });
     }
 
-    setPainter(socketId) {
-        if (this.painter.indexOf(socketId) === -1) {
-            this.painter.push(socketId);
-            this.gameFlag = true;
-            this.io.to(socketId).emit("role", CONSTANTS.ROLE_PAINTER);
-        } else {
-            this.guesser.push(socketId);
-            this.io.to(socketId).emit("role", CONSTANTS.ROLE_GUESSER);
+    setUserName(socketId, name) {
+        this.users.set(socketId, name);  
+        this.io.to(socketId).emit("usersInfo", name, CONSTANTS.NAME);   
+    }
+
+    setPainter(socketId, name) {
+        this.painter = {
+            id: socketId,
+            name
+        };
+        this.gameFlag = true;
+        this.io.to(socketId).emit("usersInfo", CONSTANTS.ROLE_PAINTER, CONSTANTS.ROLE);
+    }
+
+    setGuesser(socketId, name) {
+        const guesser = {
+            id: socketId,
+            name
         }
+        this.guesser.push(guesser);
+        this.io.to(socketId).emit("usersInfo", CONSTANTS.ROLE_GUESSER, CONSTANTS.ROLE);
+    }
+
+    getUsers() {
+        return { painter: this.painter, guesser: this.guesser } 
+    }
+
+    deleteUser(socketId) {
+        this.users.delete(socketId);
+        if (this.painter.id === socketId) {
+            this.painter.id = null;
+            this.painter.name = null;
+            this.gameFlag = false;
+        }
+        this.guesser = this.guesser.filter((guesser) => guesser.id !== socketId);
     }
 }
 
