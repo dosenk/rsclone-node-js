@@ -43,7 +43,7 @@ class SocketController {
                     this.setUserName(socketId, name)
                     if (!this.gameFlag) this.setPainter(socketId, name)
                     else this.setGuesser(socketId, name);
-                    this.io.emit("usersInfo", this.getUsers(), CONSTANTS.DRAW_INFO); //отправляет новому клиенту в игре всех пользователей в игре  
+                    this.io.emit("usersInfo", this.getUsers(), CONSTANTS.USERS); //отправляет новому клиенту в игре всех пользователей в игре  
                     this.sendDrawInfo("draw"); //отправляет новому клиенту в игре параметры рисования
                 }
             });
