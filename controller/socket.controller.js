@@ -31,6 +31,8 @@ class SocketController {
 
     addEventListeners() {
         this.io.on('connection', socket => { 
+            const ip = socket.conn.remoteAddress;
+            console.log(`client ip: ${ip}`);
             socket.on("broadcast", (args) => {
                 console.log(args);
                 this.io.emit("broadcast", this.users.get(socket.id), args);
