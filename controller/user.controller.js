@@ -3,9 +3,13 @@ const db = require('../db/db');
 class UserController {
     async createUser(req, res) {
         const { login, password } = req.body;
-        const newUser = await db.query(`INSERT INTO users (login, password, datetime) values ($1, $2, now()) RETURNING *`, [login, password]);
-
-        res.json(newUser.rows[0]);
+        const user = await db.query(`SELECT login, password FROM users WHERE login = $1`, [login]);
+        if (user.rows.length === 0) {
+            const newUser = await db.query(`INSERT INTO users (login, password, datetime) values ($1, $2, now()) RETURNING *`, [login, password]);
+            res.json('success');
+        } else {
+            res.json('login_exists');
+        }
     }
 
     async getUsers(req, res) {
