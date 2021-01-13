@@ -66,6 +66,11 @@ class SocketController {
         if (actionType === CONSTANTS.DRAW_COLOR) this.gameDrawInfo.drawColor = info;
     }
 
+    setDefaultDrawInfo() {
+        this.gameDrawInfo.drawColor = 'black';
+        this.gameDrawInfo.drawThickness = 1;
+    }
+
     sendDrawInfo(socketEvent) {
         this.io.emit(socketEvent, this.gameDrawInfo.drawColor, CONSTANTS.DRAW_COLOR);  
         this.io.emit(socketEvent, this.gameDrawInfo.drawThickness, CONSTANTS.DRAW_THICKNESS);  
@@ -77,6 +82,7 @@ class SocketController {
     }
 
     setPainter(socketId, name) {
+        this.setDefaultDrawInfo(); // для новых users устанавить параметры по умолчанию
         this.painter = {
             id: socketId,
             name
