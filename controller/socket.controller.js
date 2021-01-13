@@ -12,6 +12,10 @@ class SocketController {
             name: null,
         };
         this.guesser = [];
+        this.gameDrawInfo = {
+            drawColor: "black",
+            drawThickness: 1
+        };
         this.gameFlag = false;
     }
     
@@ -39,11 +43,13 @@ class SocketController {
                     this.setUserName(socketId, name)
                     if (!this.gameFlag) this.setPainter(socketId, name)
                     else this.setGuesser(socketId, name);
-                    this.io.emit("usersInfo", this.getUsers(), CONSTANTS.USERS);  
+                    this.io.emit("usersInfo", this.getUsers(), CONSTANTS.DRAW_INFO); //отправляет новому клиенту в игре всех пользователей в игре  
+                    this.sendDrawInfo("draw"); //отправляет новому клиенту в игре параметры рисования
                 }
             });
 
-             socket.on("draw", (info, actionType) => {
+            socket.on("draw", (info, actionType) => {
+                this.setDrawInfo(actionType, info);
                 socket.broadcast.emit("draw", info, actionType);
             });
 
@@ -53,6 +59,16 @@ class SocketController {
                 this.io.emit("usersInfo", this.getUsers(), CONSTANTS.USERS); 
             });
         });
+    }
+
+    setDrawInfo(actionType, info) {
+        if (actionType === CONSTANTS.DRAW_THICKNESS) this.gameDrawInfo.drawThickness = info;
+        if (actionType === CONSTANTS.DRAW_COLOR) this.gameDrawInfo.drawColor = info;
+    }
+
+    sendDrawInfo(socketEvent) {
+        this.io.emit(socketEvent, this.gameDrawInfo.drawColor, CONSTANTS.DRAW_COLOR);  
+        this.io.emit(socketEvent, this.gameDrawInfo.drawThickness, CONSTANTS.DRAW_THICKNESS);  
     }
 
     setUserName(socketId, name) {

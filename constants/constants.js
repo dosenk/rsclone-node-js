@@ -17,5 +17,7 @@ module.exports = {
     SOCKET_SERVER_URL,
     ROLE_PAINTER,
     ROLE_GUESSER,
-    USERS, NAME, ROLE
+    USERS, NAME, ROLE,
+    DRAW_COLOR,
+    DRAW_THICKNESS,
 }
