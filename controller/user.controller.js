@@ -10,8 +10,21 @@ class UserController {
 
     async getUsers(req, res) {
         const newUser = await db.query(`SELECT * FROM users`);
-        console.log(newUser);
         res.json(newUser.rows);
+    }
+
+    async checkUserPass(req, res) {
+        try {
+            const { login, password } = req.body;
+            const user = await db.query(`SELECT login, password FROM users WHERE login = $1`, [login]);
+            if (user.rows.length >= 1 && user.rows[0].password.trim() === password) {
+                res.json('good');
+            } else {
+                res.json('bad');
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async getOneUser(req, res) {
