@@ -34,7 +34,6 @@ class SocketController {
             const ip = socket.conn.remoteAddress;
             console.log(`client ip: ${ip}`);
             socket.on("broadcast", (args) => {
-                console.log(args);
                 this.io.emit("broadcast", this.users.get(socket.id), args);
             });
 
@@ -46,7 +45,6 @@ class SocketController {
                     if (!this.gameFlag) this.setPainter(socketId, name)
                     else this.setGuesser(socketId, name);
                     this.io.emit("usersInfo", this.getUsers(), CONSTANTS.USERS); //отправляет новому клиенту в игре всех пользователей в игре  
-                    this.sendDrawInfo("draw"); //отправляет новому клиенту в игре параметры рисования
                 }
             });
 
@@ -73,9 +71,9 @@ class SocketController {
         this.gameDrawInfo.drawThickness = 1;
     }
 
-    sendDrawInfo(socketEvent) {
-        this.io.emit(socketEvent, this.gameDrawInfo.drawColor, CONSTANTS.DRAW_COLOR);  
-        this.io.emit(socketEvent, this.gameDrawInfo.drawThickness, CONSTANTS.DRAW_THICKNESS);  
+    sendDrawInfo(socketEvent, socketId) {
+        this.io.to(socketId).emit(socketEvent, this.gameDrawInfo.drawColor, CONSTANTS.DRAW_COLOR);  
+        this.io.to(socketId).emit(socketEvent, this.gameDrawInfo.drawThickness, CONSTANTS.DRAW_THICKNESS);  
     }
 
     setUserName(socketId, name) {
@@ -84,7 +82,7 @@ class SocketController {
     }
 
     setPainter(socketId, name) {
-        this.setDefaultDrawInfo(); // для новых users устанавить параметры по умолчанию
+        this.setDefaultDrawInfo(); // для новых painter устанавить параметры по умолчанию
         this.painter = {
             id: socketId,
             name
@@ -100,6 +98,7 @@ class SocketController {
         }
         this.guesser.push(guesser);
         this.io.to(socketId).emit("usersInfo", CONSTANTS.ROLE_GUESSER, CONSTANTS.ROLE);
+        this.sendDrawInfo("draw", socketId); //отправляет новому клиенту в игре параметры рисования
     }
 
     getUsers() {
