@@ -114,7 +114,7 @@ class SocketController {
     }
 
     setPainter(socketId, name) {
-        this.setDefaultDrawInfo(); // для новых users устанавить параметры по умолчанию
+        this.setDefaultDrawInfo(); // для новых painter устанавить параметры по умолчанию
         this.painter = {
             id: socketId,
             name
