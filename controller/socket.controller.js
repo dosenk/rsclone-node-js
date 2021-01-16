@@ -11,12 +11,14 @@ class SocketController {
             id: null,
             name: null,
         };
-        this.guesser = [];
+        this.guessers = [];
         this.gameDrawInfo = {
             drawColor: "black",
             drawThickness: 1
         };
-        this.gameFlag = false;
+        this.appointedPainter = false;
+        this.gameStarted = false;
+        this.guessWord = 'qwe';
     }
     
     start(httpServer) {
@@ -31,11 +33,13 @@ class SocketController {
 
     addEventListeners() {
         this.io.on('connection', socket => { 
-            const ip = socket.conn.remoteAddress;
-            console.log(`client ip: ${ip}`);
-            socket.on("broadcast", (args) => {
-                console.log(args);
-                this.io.emit("broadcast", this.users.get(socket.id), args);
+            // const ip = socket.conn.remoteAddress;
+            // console.log(`client ip: ${ip}`);
+
+            socket.on("broadcast", (word) => {
+                const senderName = this.users.get(socket.id);
+                this.io.emit("broadcast", senderName, word);
+                this.checkAnswer(word, senderName);
             });
 
             socket.on("usersInfo", (info, actionType) => {
@@ -43,10 +47,13 @@ class SocketController {
                     const name = info;
                     const socketId = socket.id;
                     this.setUserName(socketId, name)
-                    if (!this.gameFlag) this.setPainter(socketId, name)
+                    if (!this.appointedPainter) this.setPainter(socketId, name)
                     else this.setGuesser(socketId, name);
-                    this.io.emit("usersInfo", this.getUsers(), CONSTANTS.USERS); //отправляет новому клиенту в игре всех пользователей в игре  
-                    this.sendDrawInfo("draw"); //отправляет новому клиенту в игре параметры рисования
+                    //отправляет новому клиенту в игре всех пользователей в игре
+                    this.io.emit("usersInfo", this.getUsers(), CONSTANTS.USERS);   
+                    //отправляет новому клиенту в игре параметры рисования
+                    this.sendDrawInfo("draw"); 
+                    this.startGame();
                 }
             });
 
@@ -63,19 +70,42 @@ class SocketController {
         });
     }
 
-    setDrawInfo(actionType, info) {
-        if (actionType === CONSTANTS.DRAW_THICKNESS) this.gameDrawInfo.drawThickness = info;
-        if (actionType === CONSTANTS.DRAW_COLOR) this.gameDrawInfo.drawColor = info;
+    startGame() {
+        // console.log(this.painter + ' painter /n', this.guessers + ' - guessers /n', this.users.size);
+        if (this.users.size >= 2) {
+            // установить флаг, что игра началась
+            this.gameStarted = true;
+            // отправить роли игрокам: painter, guesser
+            this.io.to(this.painter.id).emit("usersInfo", CONSTANTS.ROLE_PAINTER, CONSTANTS.ROLE);
+            this.guessers.forEach(guesser => {
+                this.io.to(guesser.id).emit("usersInfo", CONSTANTS.ROLE_GUESSER, CONSTANTS.ROLE);
+            });
+            // отправляем в сокет загаданное слово с флагом: START_GAME
+            this.io.emit("game", this.guessWord, CONSTANTS.START_GAME);
+        } else if (this.gameStarted) {
+            // если игра идет, то каждый, кто подключается становиться guesser
+            const lastGuessor = this.guessers[this.guessers.length - 1];
+            this.io.to(lastGuessor.id).emit("usersInfo", CONSTANTS.ROLE_GUESSER, CONSTANTS.ROLE);
+        }
     }
 
-    setDefaultDrawInfo() {
-        this.gameDrawInfo.drawColor = 'black';
-        this.gameDrawInfo.drawThickness = 1;
+    stopGame() {
+        this.gameStarted = false;
+        this.deleteUser(this.painter.id);
+        this.guessers.forEach(guesser => {
+            this.deleteUser(guesser.id);
+        })
     }
 
-    sendDrawInfo(socketEvent) {
-        this.io.emit(socketEvent, this.gameDrawInfo.drawColor, CONSTANTS.DRAW_COLOR);  
-        this.io.emit(socketEvent, this.gameDrawInfo.drawThickness, CONSTANTS.DRAW_THICKNESS);  
+    checkAnswer(word, senderName) {
+        if (word === this.guessWord) {
+            const info = {
+                word,
+                senderName
+            }
+            this.io.emit("game", info, CONSTANTS.STOP_GAME);
+            this.stopGame();
+        }
     }
 
     setUserName(socketId, name) {
@@ -89,8 +119,7 @@ class SocketController {
             id: socketId,
             name
         };
-        this.gameFlag = true;
-        this.io.to(socketId).emit("usersInfo", CONSTANTS.ROLE_PAINTER, CONSTANTS.ROLE);
+        this.appointedPainter = true;
     }
 
     setGuesser(socketId, name) {
@@ -98,12 +127,11 @@ class SocketController {
             id: socketId,
             name
         }
-        this.guesser.push(guesser);
-        this.io.to(socketId).emit("usersInfo", CONSTANTS.ROLE_GUESSER, CONSTANTS.ROLE);
+        this.guessers.push(guesser);
     }
 
     getUsers() {
-        return { painter: this.painter, guesser: this.guesser } 
+        return { painter: this.painter, guesser: this.guessers } 
     }
 
     deleteUser(socketId) {
@@ -111,9 +139,25 @@ class SocketController {
         if (this.painter.id === socketId) {
             this.painter.id = null;
             this.painter.name = null;
-            this.gameFlag = false;
+            this.appointedPainter = false;
+            this.gameStarted = false;
         }
-        this.guesser = this.guesser.filter((guesser) => guesser.id !== socketId);
+        this.guessers = this.guessers.filter((guesser) => guesser.id !== socketId);
+    }
+
+    setDrawInfo(actionType, info) {
+        if (actionType === CONSTANTS.DRAW_THICKNESS) this.gameDrawInfo.drawThickness = info;
+        if (actionType === CONSTANTS.DRAW_COLOR) this.gameDrawInfo.drawColor = info;
+    }
+
+    setDefaultDrawInfo() {
+        this.gameDrawInfo.drawColor = 'black';
+        this.gameDrawInfo.drawThickness = 1;
+    }
+
+    sendDrawInfo(socketEvent) {
+        this.io.emit(socketEvent, this.gameDrawInfo.drawColor, CONSTANTS.DRAW_COLOR);  
+        this.io.emit(socketEvent, this.gameDrawInfo.drawThickness, CONSTANTS.DRAW_THICKNESS);  
     }
 }
 

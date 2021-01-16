@@ -11,7 +11,8 @@ const USERS = 'USERS';
 const DRAW_THICKNESS = 'DRAW_THICKNESS';
 const DRAW_COLOR = 'DRAW_COLOR';
 const CLEAR_BOARD = 'CLEAR_BOARD';
-
+const STOP_GAME = 'STOP_GAME';
+const START_GAME = 'START_GAME';
 
 module.exports = {
     SOCKET_SERVER_URL,
@@ -20,4 +21,6 @@ module.exports = {
     USERS, NAME, ROLE,
     DRAW_COLOR,
     DRAW_THICKNESS,
+    STOP_GAME,
+    START_GAME
 }
