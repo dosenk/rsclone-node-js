@@ -1,4 +1,3 @@
-const { threadId } = require('worker_threads');
 const db = require('../../db/db');
 const Users = require('./Users');
 const CONSTANTS = require('../../constants/constants');
@@ -7,14 +6,40 @@ class Game {
   constructor(gameCount) {
     this.users = new Users();
     this.gameStarted = false;
-    this.gameStop = true;
     this.gameDrawInfo = {
       drawColor: 'black',
       drawThickness: 1,
     };
-    this.appointedPainter = false;
     this.gameCount = gameCount;
     this.guessWord = '';
+  }
+
+  addUser(name, socketId) {
+    this.users.addUser(name, socketId);
+  }
+
+  getGameStatus() {
+    return this.gameStarted;
+  }
+
+  getCountUsers() {
+    return this.users.getCountUsers();
+  }
+
+  getState(socketId) {
+    const user = this.user.getUser(socketId);
+    return {
+      actionTypes: [CONSTANTS.ROLE,
+        CONSTANTS.USERS,
+        CONSTANTS.WORD_TO_GUESS,
+        CONSTANTS.DRAW_COLOR,
+        CONSTANTS.DRAW_THICKNESS],
+      broadcast: false,
+      user,
+      users: this.users.getUsersRole(),
+      word: this.guessWord,
+      gameDrawInfo: this.gameDrawInfo,
+    };
   }
 
   async getGameState(actionType, data) {
@@ -26,8 +51,18 @@ class Game {
     switch (actionType) {
       case CONSTANTS.NAME:
         this.users.addUser(data.name, data.socketId);
-        if (this.canStartGame()) state = await this.startGame();
-        if (this.gameStarted) state = this.updateGame();
+        if (this.users.getCountUsers() >= 2) {
+          if (!this.gameStarted) {
+            this.gameStarted = true;
+            this.users.setUsersRole();
+            state = await this.sendWordsToSelect();
+          } else {
+            state = this.updateGameUsers();
+          }
+        }
+        break;
+      case CONSTANTS.START_GAME:
+        state = this.updateGame();
         break;
       case CONSTANTS.DELETE_USERS:
         this.users.deleteUser(data);
@@ -40,8 +75,36 @@ class Game {
     return state;
   }
 
-  setGameWord(word) {
-    this.guessWord = word;
+  async sendWordsToSelect() {
+    this.gameStarted = true;
+    this.setDefaultDrawInfo();
+    const words = await this.getWords();
+    return {
+      actionTypes: [CONSTANTS.WORDS_TO_SELECT],
+      words,
+    };
+  }
+
+  updateGameUsers() {
+    return {
+      actionTypes: [
+        CONSTANTS.USERS,
+      ],
+      gameDrawInfo: this.gameDrawInfo,
+      users: this.users.getUsersRole(),
+    };
+  }
+
+  sendGameInfoLastUser(user) {
+    return {
+      actionTypes: [
+        CONSTANTS.DRAW_COLOR,
+        CONSTANTS.DRAW_THICKNESS,
+        CONSTANTS.ROLE,
+      ],
+      gameDrawInfo: this.gameDrawInfo,
+      user,
+    };
   }
 
   setDrawInfo(actionType, info) {
@@ -50,52 +113,27 @@ class Game {
   }
 
   async getWords() {
-    const idWords = [1, 2, 3].map((id, idx) => idx + (this.gameCount * 3));
+    const idWords = [1, 2, 3].map((id) => id + (this.gameCount * 3));
+    this.gameCount += 1;
     const words = await db.query('SELECT word FROM words WHERE id IN ($1, $2, $3)', idWords);
-    this.guessWords = words.rows;
-  }
-
-  canStartGame() {
-    return this.users.getNumberUsers() >= 2 && !this.gameStarted;
-  }
-
-  async startGame() {
-    this.gameStarted = true;
-    this.setDefaultDrawInfo();
-    const words = await this.getWords();
-    return {
-      actionTypes: [
-        CONSTANTS.WORD,
-        CONSTANTS.USERS,
-        CONSTANTS.DRAW_COLOR,
-        CONSTANTS.DRAW_THICKNESS,
-      ],
-
-      words,
-      users: this.users.getUsersRole(true),
-    };
-  }
-
-  updateGame() {
-    const newGameFlag = false;
-    return {
-      actionTypes: [
-        CONSTANTS.USERS,
-        CONSTANTS.DRAW_COLOR,
-        CONSTANTS.DRAW_THICKNESS,
-      ],
-      gameDrawInfo: this.gameDrawInfo,
-      users: this.users.getUsersRole(newGameFlag),
-    };
+    return words.rows.map((wordObj) => wordObj.word);
   }
 
   getUserName(socketid) {
-    return this.users.getUserName(socketid);
+    return this.users.getUser(socketid).name;
+  }
+
+  getUserRole(socketid) {
+    return this.users.getUser(socketid).role;
   }
 
   setDefaultDrawInfo() {
     this.gameDrawInfo.drawColor = 'black';
     this.gameDrawInfo.drawThickness = 1;
+  }
+
+  setGameWord(word) {
+    this.guessWord = word;
   }
 
   updateUsersRole() {

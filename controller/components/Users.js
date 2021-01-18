@@ -1,14 +1,9 @@
 const User = require('./User');
+const CONSTANTS = require('../../constants/constants');
 
 class Users {
   constructor() {
-    this.exPainters = new Map();
-    this.guessers = new Map();
     this.allUsers = new Map(); // ключ socketId
-  }
-
-  getUserName(socketId) {
-    return this.allUsers.get(socketId);
   }
 
   addUser(name, socketId) {
@@ -16,53 +11,55 @@ class Users {
     this.allUsers.set(socketId, user);
   }
 
-  deleteUser(name) {
-    this.allUsers.delete(name);
-    this.exPainters.delete(name);
-    this.guessers.delete(name);
+  getUser(socketId) {
+    return this.allUsers.get(socketId);
   }
 
-  getNumberUsers() {
+  deleteUser(socketId) {
+    this.allUsers.delete(socketId);
+  }
+
+  setUsersRole() {
+    let isSetPainter = false;
+    this.allUsers.forEach((user) => {
+      // если был painter, то становится guesser
+      if (user.role === CONSTANTS.ROLE_PAINTER) user.setRole(CONSTANTS.ROLE_GUESSER);
+      // если не был painter и пока painter не найден
+      if (!user.exPainterFlag && !isSetPainter) {
+        isSetPainter = true;
+        user.setRole(CONSTANTS.ROLE_PAINTER);
+      }
+    });
+    // если painter не найден, то делаем всех игроков guesser и устанавливаем роли еще раз
+    if (!isSetPainter) {
+      this.setUsersDefaultRole();
+      this.setUsersRole();
+    }
+  }
+
+  setUsersDefaultRole() {
+    this.allUsers.forEach((user) => {
+      const nUser = user;
+      nUser.setRole(CONSTANTS.ROLE_GUESSER);
+      nUser.exPainterFlag = false;
+    });
+  }
+
+  getCountUsers() {
     return this.allUsers.size;
   }
 
-  getPainter() {
-    let findPainterFlag = false;
-    this.allUsers.forEach((objUser, key) => {
-      if (!this.exPainters.has(key) && !findPainterFlag) {
-        this.painter = objUser;
-        this.exPainters.set(objUser);
-        findPainterFlag = true;
-      }
+  getUsersRole() {
+    let painter;
+    const guessers = [];
+    this.allUsers.forEach((user) => {
+      if (user.role === CONSTANTS.ROLE_PAINTER) painter = user.getUser();
+      if (user.role === CONSTANTS.ROLE_GUESSER) guessers.push(user.getUser());
     });
-    if (!findPainterFlag) {
-      this.removeExPainters();
-      this.getPainter();
-    }
-    return this.painter;
-  }
-
-  removeExPainters() {
-    this.exPainters.clear();
-  }
-
-  getGuessers() {
-    const guessers = Users.getDifferenceUsers(this.allUsers, this.painter);
-    return Array.from(guessers, (guesser) => Object.fromEntries([guesser]));
-  }
-
-  static getDifferenceUsers(allUsers, users) {
-    const difference = new Map(allUsers);
-    difference.delete(users.socketId);
-    return difference;
-  }
-
-  getUsersRole(newGameFlag) {
-    const usersRole = {
-      painter: newGameFlag ? this.getPainter() : this.painter,
-      guessers: this.getGuessers(),
+    return {
+      painter,
+      guessers,
     };
-    return usersRole;
   }
 }
 
