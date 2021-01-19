@@ -1,14 +1,12 @@
 /* eslint-disable max-len */
-const server = require('http');
+// const server = require('http');
 const io = require('socket.io');
 const CONSTANTS = require('../constants/constants');
 const Game = require('./components/Game');
 const Users = require('./components/Users');
 
 class SocketController {
-  constructor(server, url) {
-    this.server = server;
-    this.url = url;
+  constructor() {
     this.gameCount = 0;
     this.users = new Users();
     this.game = new Game(this.gameCount, this.users);
@@ -90,8 +88,8 @@ class SocketController {
         } else {
           const lastUser = this.users.allUsers.get(socketId);
           this.io.to(lastUser.socketId).emit('usersInfo', lastUser.role, CONSTANTS.ROLE);
-          this.sendStartGame(lastUser.socketId);
           this.sendDrawInfo(lastUser.socketId);
+          if (this.game.getGuessWord() !== '') this.sendStartGame(lastUser.socketId);
         }
         this.sendUsers();
       }
@@ -101,9 +99,7 @@ class SocketController {
   checkGameEvent(actionType, data) {
     if (actionType === CONSTANTS.WORD_TO_GUESS) {
       this.game.setGameWord(data);
-    }
-    if (this.game.getGuessWord() !== '') {
-      this.io.emit('game', this.game.guessWord, CONSTANTS.START_GAME);
+      this.sendStartGame();
     }
   }
 
@@ -149,4 +145,4 @@ class SocketController {
   }
 }
 
-module.exports = new SocketController(server, CONSTANTS);
+module.exports = new SocketController();
