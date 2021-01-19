@@ -19,7 +19,7 @@ class Users {
     this.allUsers.delete(socketId);
   }
 
-  setUsersRole() {
+  setRoles() {
     let isSetPainter = false;
     this.allUsers.forEach((user) => {
       // если был painter, то становится guesser
@@ -45,11 +45,7 @@ class Users {
     });
   }
 
-  getCountUsers() {
-    return this.allUsers.size;
-  }
-
-  getUsersRole() {
+  getRoles() {
     let painter;
     const guessers = [];
     this.allUsers.forEach((user) => {
@@ -60,6 +56,10 @@ class Users {
       painter,
       guessers,
     };
+  }
+
+  getCountUsers() {
+    return this.allUsers.size;
   }
 }
 
