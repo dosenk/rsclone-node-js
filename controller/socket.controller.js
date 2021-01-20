@@ -50,7 +50,7 @@ class SocketController {
     this.sendMessage(message, socketId, 'broadcast');
     if (this.game.checkGuessWord(message)) {
       this.game.stop();
-      this.sendStopGame(socketId, message);
+      this.sendStopGame(socketId, message.toLowerCase());
     }
   }
 

@@ -54,7 +54,7 @@ class Game {
   }
 
   checkGuessWord(word) {
-    return this.guessWord === word;
+    return this.guessWord.toLowerCase() === word.toLowerCase();
   }
 
   setGameWord(word) {
