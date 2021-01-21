@@ -21,6 +21,9 @@ class Game {
 
   stop() {
     this.isGameStarted = false;
+    this.users.setDefaultGameStatus();
+    console.log('setDefaulGame status');
+    console.log(this.users);
   }
 
   setUserInfo(name, socketId) {

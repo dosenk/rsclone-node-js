@@ -18,6 +18,9 @@ const WORD_TO_GUESS = 'WORD_TO_GUESS';
 
 const STOP_GAME = 'STOP_GAME';
 const START_GAME = 'START_GAME';
+const NEW_GAME = 'NEW_GAME';
+const LOADING_GAME = 'LOADING_GAME';
+const READY_TO_GAME = 'READY_TO_GAME';
 const CONNECT_TO_GAME = 'CONNECT_TO_GAME';
 
 module.exports = {
@@ -34,4 +37,7 @@ module.exports = {
   WORD_TO_GUESS,
   WORDS_TO_SELECT,
   DELETE_USERS,
+  NEW_GAME,
+  LOADING_GAME,
+  READY_TO_GAME,
 };

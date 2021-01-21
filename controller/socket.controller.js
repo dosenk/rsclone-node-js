@@ -49,16 +49,16 @@ class SocketController {
   checkBroadcastEvent(message, socketId) {
     this.sendMessage(message, socketId, 'broadcast');
     if (this.game.checkGuessWord(message)) {
-      this.game.stop();
       this.sendStopGame(socketId, message.toLowerCase());
+      this.game.stop();
     }
   }
 
   checkDisconnectEvent(socketId) {
     this.users.deleteUser(socketId);
     if (this.users.getCountUsers() < 2) {
-      this.game.stop();
       this.sendStopGame(null, null, true);
+      this.game.stop();
     }
     this.sendUsers();
   }
@@ -78,28 +78,46 @@ class SocketController {
   async checkUserInfoEvent(actionType, data, socketId) {
     if (actionType === CONSTANTS.NAME) {
       this.users.addUser(data, socketId);
-      if (this.users.getCountUsers() >= 2) {
-        if (!this.game.getIsGameStarted()) {
-          await this.game.start();
-          this.users.allUsers.forEach((user) => {
-            this.sendRole(user.role, user.socketId);
-            if (user.role === CONSTANTS.ROLE_PAINTER) this.sendWordToSelect(user.socketId);
-          });
-        } else {
-          const lastUser = this.users.allUsers.get(socketId);
-          this.io.to(lastUser.socketId).emit('usersInfo', lastUser.role, CONSTANTS.ROLE);
-          this.sendDrawInfo(lastUser.socketId);
-          if (this.game.getGuessWord() !== '') this.sendStartGame(lastUser.socketId);
-        }
-        this.sendUsers();
-      }
     }
   }
 
-  checkGameEvent(actionType, data) {
+  chooseGameOption(socketId) {
+    if (!this.game.getIsGameStarted()) this.startGame();
+    else this.connectGame(socketId);
+    this.sendUsers();
+  }
+
+  async startGame() {
+    await this.game.start();
+    this.users.allUsers.forEach((user) => {
+      this.sendRole(user);
+      if (user.role === CONSTANTS.ROLE_PAINTER) { this.sendWordToSelect(user.socketId); }
+    });
+  }
+
+  connectGame(socketId) {
+    this.sendGameEvent(socketId, CONSTANTS.LOADING_GAME);
+    const lastUser = this.users.allUsers.get(socketId);
+    this.sendRole(lastUser);
+    this.sendDrawInfo(lastUser.socketId);
+    if (this.game.getGuessWord() !== '') this.sendGameEvent(lastUser.socketId, CONSTANTS.START_GAME);
+  }
+
+  checkGameEvent(actionType, data, socketId) {
     if (actionType === CONSTANTS.WORD_TO_GUESS) {
       this.game.setGameWord(data);
-      this.sendStartGame();
+      this.sendGameEvent(null, CONSTANTS.START_GAME);
+    }
+    if (actionType === CONSTANTS.NEW_GAME) {
+      if (this.users.getCountReadyUsers() >= 2) {
+        this.chooseGameOption(socketId);
+      }
+    }
+    if (actionType === CONSTANTS.READY_TO_GAME) {
+      this.users.setReadyToGameFlag(socketId, data);
+      if (this.users.getCountReadyUsers() >= 2) {
+        this.chooseGameOption(socketId);
+      }
     }
   }
 
@@ -108,17 +126,18 @@ class SocketController {
     this.io.emit(socketEvent, name, message);
   }
 
-  sendRole(role, socketId) {
-    this.io.to(socketId).emit('usersInfo', role, CONSTANTS.ROLE);
+  sendRole(user) {
+    if (user.isReadyToGame) { this.io.to(user.socketId).emit('usersInfo', user.role, CONSTANTS.ROLE); }
   }
 
   sendWordToSelect(socketId) {
     this.io.to(socketId).emit('game', this.game.wordsToSelect, CONSTANTS.WORDS_TO_SELECT);
   }
 
-  sendStartGame(socketId = null) {
-    if (!socketId) this.io.emit('game', this.game.guessWord, CONSTANTS.START_GAME);
-    else this.io.to(socketId).emit('game', this.game.guessWord, CONSTANTS.START_GAME);
+  sendGameEvent(socketId = null, gameEvent) {
+    if (!socketId) {
+      this.sendDataInGameUsers('game', this.game.guessWord, gameEvent);
+    } else this.io.to(socketId).emit('game', this.game.guessWord, gameEvent);
   }
 
   sendStopGame(winnerSocketId, guessWord, waitUsersFlag = false) {
@@ -130,7 +149,7 @@ class SocketController {
         winnerName: this.users.getUser(winnerSocketId).name,
         guessWord,
       };
-    this.io.emit('game', data, CONSTANTS.STOP_GAME);
+    this.sendDataInGameUsers('game', data, CONSTANTS.STOP_GAME);
   }
 
   sendDrawInfo(socketId) {
@@ -142,6 +161,13 @@ class SocketController {
   sendUsers() {
     const users = this.users.getRoles();
     this.io.emit('usersInfo', users, CONSTANTS.USERS);
+  }
+
+  sendDataInGameUsers(socketEvent, data, actionType) {
+    this.users.getUser('All').forEach((user) => {
+      console.log(user);
+      if (user.isReadyToGame) this.io.to(user.socketId).emit(socketEvent, data, actionType);
+    });
   }
 }
 
