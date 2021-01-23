@@ -1,4 +1,5 @@
 const db = require('../../db/db');
+const statsController = require('../stats.controller');
 const CONSTANTS = require('../../constants/constants');
 
 class Game {
@@ -19,11 +20,11 @@ class Game {
     await this.getWords();
   }
 
-  stop() {
+  async stop(winnerName, answer) {
+    const painterName = this.users.getPainter().name;
+    await statsController.setUserStats(winnerName, painterName, answer);
     this.isGameStarted = false;
     this.users.setDefaultGameStatus();
-    console.log('setDefaulGame status');
-    console.log(this.users);
   }
 
   setUserInfo(name, socketId) {

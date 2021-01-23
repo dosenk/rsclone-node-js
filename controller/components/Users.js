@@ -29,9 +29,6 @@ class Users {
     this.allUsers.forEach((user) => {
       user.setRole(CONSTANTS.ROLE_GUESSER);
       if (user.isReadyToGame) {
-      // если был painter, то становится guesser
-        // if (user.role === CONSTANTS.ROLE_PAINTER) user.setRole(CONSTANTS.ROLE_GUESSER);
-        // если не был painter и пока painter не найден
         if (!user.isWasPainter && !isSetPainter) {
           isSetPainter = true;
           user.setRole(CONSTANTS.ROLE_PAINTER);
@@ -58,6 +55,16 @@ class Users {
       const currentUser = user;
       currentUser.isReadyToGame = false;
     });
+  }
+
+  getpainter() {
+    let painterName;
+    this.allUsers.forEach((user) => {
+      painterName = user.role === CONSTANTS.ROLE_PAINTER
+        ? user.getUser()
+        : undefined;
+    });
+    return painterName;
   }
 
   getRoles() {

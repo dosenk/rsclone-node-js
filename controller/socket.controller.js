@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-// const server = require('http');
 const io = require('socket.io');
 const CONSTANTS = require('../constants/constants');
 const Game = require('./components/Game');
@@ -49,8 +47,10 @@ class SocketController {
   checkBroadcastEvent(message, socketId) {
     this.sendMessage(message, socketId, 'broadcast');
     if (this.game.checkGuessWord(message)) {
-      this.sendStopGame(socketId, message.toLowerCase());
-      this.game.stop();
+      const { name } = this.users.getUser(socketId);
+      const answer = message.toLowerCase();
+      this.sendStopGame(socketId, answer);
+      this.game.stop(name, answer);
     }
   }
 
@@ -165,7 +165,6 @@ class SocketController {
 
   sendDataInGameUsers(socketEvent, data, actionType) {
     this.users.getUser('All').forEach((user) => {
-      console.log(user);
       if (user.isReadyToGame) this.io.to(user.socketId).emit(socketEvent, data, actionType);
     });
   }
