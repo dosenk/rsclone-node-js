@@ -1,5 +1,4 @@
 const db = require('../../db/db');
-const statsController = require('../stats.controller');
 const CONSTANTS = require('../../constants/constants');
 
 class Game {
