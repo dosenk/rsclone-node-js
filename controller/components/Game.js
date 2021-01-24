@@ -20,9 +20,7 @@ class Game {
     await this.getWords();
   }
 
-  async stop(winnerName, answer) {
-    const painterName = this.users.getPainter().name;
-    await statsController.setUserStats(winnerName, painterName, answer);
+  async stop() {
     this.isGameStarted = false;
     this.users.setDefaultGameStatus();
   }

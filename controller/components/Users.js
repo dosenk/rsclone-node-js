@@ -57,7 +57,7 @@ class Users {
     });
   }
 
-  getpainter() {
+  getPainter() {
     let painterName;
     this.allUsers.forEach((user) => {
       painterName = user.role === CONSTANTS.ROLE_PAINTER

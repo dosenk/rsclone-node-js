@@ -47,10 +47,9 @@ class SocketController {
   checkBroadcastEvent(message, socketId) {
     this.sendMessage(message, socketId, 'broadcast');
     if (this.game.checkGuessWord(message)) {
-      const { name } = this.users.getUser(socketId);
       const answer = message.toLowerCase();
       this.sendStopGame(socketId, answer);
-      this.game.stop(name, answer);
+      this.game.stop();
     }
   }
 
