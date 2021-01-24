@@ -6,6 +6,7 @@ const Users = require('./components/Users');
 class SocketController {
   constructor() {
     this.gameCount = 0;
+    this.msgCount = 0;
     this.users = new Users();
     this.game = new Game(this.gameCount, this.users);
   }
@@ -22,8 +23,8 @@ class SocketController {
 
   addEventListeners() {
     this.io.on('connection', (socket) => {
-      socket.on('broadcast', (message) => {
-        this.checkBroadcastEvent(message, socket.id);
+      socket.on('broadcast', (message, actionType) => {
+        this.checkBroadcastEvent(message, actionType, socket);
       });
 
       socket.on('usersInfo', (data, actionType) => {
@@ -44,11 +45,11 @@ class SocketController {
     });
   }
 
-  checkBroadcastEvent(message, socketId) {
-    this.sendMessage(message, socketId, 'broadcast');
-    if (this.game.checkGuessWord(message)) {
+  checkBroadcastEvent(message, actionType, socket) {
+    this.sendMessage(message, actionType, socket, 'broadcast');
+    if (this.game.checkGuessWord(message, actionType)) {
       const answer = message.toLowerCase();
-      this.sendStopGame(socketId, answer);
+      this.sendStopGame(socket.id, answer);
       this.game.stop();
     }
   }
@@ -120,9 +121,18 @@ class SocketController {
     }
   }
 
-  sendMessage(message, socketId, socketEvent) {
-    const { name } = this.users.getUser(socketId);
-    this.io.emit(socketEvent, name, message);
+  sendMessage(message, actionType, socket, socketEvent) {
+    let data = message;
+    const { name } = this.users.getUser(socket.id);
+    if (actionType === CONSTANTS.BROADCAST_MSG) {
+      data = [message, this.msgCount += 1];
+      this.io.emit(socketEvent, name, data, actionType);
+    } else if (
+      actionType === CONSTANTS.BROADCAST_LIKE
+      || actionType === CONSTANTS.BROADCAST_DISLIKE
+    ) {
+      socket.broadcast.emit(socketEvent, name, data, actionType);
+    }
   }
 
   sendRole(user) {
@@ -140,6 +150,7 @@ class SocketController {
   }
 
   sendStopGame(winnerSocketId, guessWord, waitUsersFlag = false) {
+    this.msgCount = 0;
     const data = waitUsersFlag
       ? {
         loading: waitUsersFlag,

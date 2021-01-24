@@ -21,7 +21,9 @@ const START_GAME = 'START_GAME';
 const NEW_GAME = 'NEW_GAME';
 const LOADING_GAME = 'LOADING_GAME';
 const READY_TO_GAME = 'READY_TO_GAME';
-const CONNECT_TO_GAME = 'CONNECT_TO_GAME';
+const BROADCAST_LIKE = 'like';
+const BROADCAST_DISLIKE = 'dislike';
+const BROADCAST_MSG = 'msg';
 
 module.exports = {
   SOCKET_SERVER_URL,
@@ -40,4 +42,7 @@ module.exports = {
   NEW_GAME,
   LOADING_GAME,
   READY_TO_GAME,
+  BROADCAST_LIKE,
+  BROADCAST_DISLIKE,
+  BROADCAST_MSG,
 };

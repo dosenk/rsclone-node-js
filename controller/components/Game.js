@@ -55,8 +55,10 @@ class Game {
     this.wordsToSelect = words.rows.map((wordObj) => wordObj.word);
   }
 
-  checkGuessWord(word) {
-    return this.guessWord.toLowerCase() === word.toLowerCase();
+  checkGuessWord(word, actionType) {
+    return actionType === CONSTANTS.BROADCAST_MSG
+      ? this.guessWord.toLowerCase() === word.toLowerCase()
+      : false;
   }
 
   setGameWord(word) {
