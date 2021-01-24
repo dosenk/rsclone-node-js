@@ -3,9 +3,9 @@ const db = require('../db/db');
 class StatsController {
   static async getUserStats(req, res) {
     const { name } = req.query;
-    const userId = await db.query('SELECT id FROM users WHERE login = $1', [name]);
-    const userStats = await db.query('SELECT draw_words_num, guess_words_num, game_count FROM stats WHERE users_id = $1', [userId.rows[0].id]);
-    res.json(userStats.rows[0]);
+    const user = await db.query('SELECT id, datetime FROM users WHERE login = $1', [name]);
+    const userStats = await db.query('SELECT draw_words_num, guess_words_num, game_count FROM stats WHERE users_id = $1', [user.rows[0].id]);
+    res.json({ ...user.rows[0], ...userStats.rows[0] });
   }
 
   static async setUserStats(req, res) {
