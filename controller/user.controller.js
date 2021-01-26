@@ -10,8 +10,6 @@ class UserController {
       await db.query(
         'INSERT INTO users (login, password, sex, country, create_date) values ($1, $2, $3, $4, now()) RETURNING *', [login, password, sex, country],
       );
-      // await db.query('INSERT INTO stats (draw_words_num, guess_words_num, game_count, users_id) values ($1, $2, $3, $4) RETURNING *', [0, 0, 0, result.rows[0].id]);
-
       res.json('success');
     } else {
       res.json('login_exists');
