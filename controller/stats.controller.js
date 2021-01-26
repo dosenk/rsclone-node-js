@@ -28,8 +28,7 @@ class StatsController {
   }
 
   static async getUsersRating(req, res) {
-    const rating = await db.query('SELECT login, sex, country, rating FROM users ORDER BY rating DESC');
-    // console.log(rating.rows);
+    const rating = await db.query('SELECT login as name, sex, country, rating FROM users ORDER BY rating DESC');
     res.json(rating.rows);
   }
 }
