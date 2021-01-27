@@ -18,11 +18,11 @@ class StatsController {
 
   static async setUserStats(req, res) {
     const {
-      name, drawWordNum, guessWordNum, gameCount,
+      name, drawWordsNum, guessWordsNum, gameCount,
     } = req.body;
-    const rating = Math.round((drawWordNum * 10 + guessWordNum * 20) / gameCount);
+    const rating = Math.round((drawWordsNum * 10 + guessWordsNum * 20) / gameCount);
     const userStats = await db.query('UPDATE users SET draw_words_num = $1, guess_words_num = $2, game_count = $3, rating = $4 WHERE login = $5 RETURNING *',
-      [drawWordNum, guessWordNum, gameCount, rating, name]);
+      [drawWordsNum, guessWordsNum, gameCount, rating, name]);
     if (userStats.rows.length > 0) res.json('success');
     else res.json('error');
   }
