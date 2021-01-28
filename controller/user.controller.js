@@ -36,8 +36,8 @@ class UserController {
   }
 
   static async getOneUser(req, res) {
-    const { name } = req.query;
-    const user = await db.query('SELECT * FROM users where name = $1', [name]);
+    const { name } = req.params;
+    const user = await db.query('SELECT * FROM users where login = $1', [name]);
     res.json(user.rows[0]);
   }
 
