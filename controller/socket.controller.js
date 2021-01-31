@@ -59,8 +59,9 @@ class SocketController {
     if (this.users.getCountUsers() < 2) {
       this.sendStopGame(null, null, true);
       this.game.stop();
+    } else {
+      this.sendUsers();
     }
-    this.sendUsers();
   }
 
   checkDrawEvent(actionType, data, socket) {
