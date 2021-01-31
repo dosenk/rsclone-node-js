@@ -119,6 +119,10 @@ class SocketController {
         this.chooseGameOption(socketId);
       }
     }
+    if (actionType === CONSTANTS.STOP_GAME) {
+      this.sendStopGame(null, data);
+      this.game.stop();
+    }
   }
 
   sendMessage(message, actionType, socket, socketEvent) {
@@ -156,7 +160,7 @@ class SocketController {
         loading: waitUsersFlag,
       }
       : {
-        winnerName: this.users.getUser(winnerSocketId).name,
+        winnerName: winnerSocketId ? this.users.getUser(winnerSocketId).name : undefined,
         guessWord,
       };
     this.sendDataInGameUsers('game', data, CONSTANTS.STOP_GAME);
