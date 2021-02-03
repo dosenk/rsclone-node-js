@@ -56,7 +56,7 @@ class SocketController {
 
   checkDisconnectEvent(socketId) {
     this.users.deleteUser(socketId);
-    if (this.users.getCountUsers() < 2) {
+    if (this.users.getCountUsers() < 2 || !this.users.getPainter()) {
       this.sendStopGame(null, null, true);
       this.game.stop();
     } else {
@@ -121,7 +121,7 @@ class SocketController {
       }
     }
     if (actionType === CONSTANTS.STOP_GAME) {
-      this.sendStopGame(null, data);
+      this.sendStopGame(null, data, true);
       this.game.stop();
     }
   }
