@@ -7,9 +7,9 @@ class UserController {
     } = req.body;
     const user = await db.query('SELECT login, password FROM users WHERE login = $1', [login]);
     if (user.rows.length === 0) {
-      const result = await db.query('INSERT INTO users (login, password, sex, country, datetime) values ($1, $2, $3, $4, now()) RETURNING *', [login, password, sex, country]);
-
-      await db.query('INSERT INTO stats (draw_words_num, guess_words_num, game_count, users_id) values ($1, $2, $3, $4) RETURNING *', [0, 0, 0, result.rows[0].id]);
+      await db.query(
+        'INSERT INTO users (login, password, sex, country, create_date) values ($1, $2, $3, $4, now()) RETURNING *', [login, password, sex, country],
+      );
       res.json('success');
     } else {
       res.json('login_exists');
@@ -22,22 +22,18 @@ class UserController {
   }
 
   static async checkUserPass(req, res) {
-    try {
-      const { login, password } = req.body;
-      const user = await db.query('SELECT login, password FROM users WHERE login = $1', [login]);
-      if (user.rows.length >= 1 && user.rows[0].password.trim() === password) {
-        res.json('good');
-      } else {
-        res.json('bad');
-      }
-    } catch (error) {
-      console.log(error);
+    const { login, password } = req.body;
+    const user = await db.query('SELECT login, password FROM users WHERE login = $1', [login]);
+    if (user.rows.length >= 1 && user.rows[0].password.trim() === password) {
+      res.json('good');
+    } else {
+      res.json('bad');
     }
   }
 
   static async getOneUser(req, res) {
-    const { name } = req.query;
-    const user = await db.query('SELECT * FROM users where name = $1', [name]);
+    const { name } = req.params;
+    const user = await db.query('SELECT login as name, country, sex, draw_words_num as drowWordsNum, guess_words_num as guessWordsNum, game_count as gameCount, rating FROM users where login = $1', [name]);
     res.json(user.rows[0]);
   }
 

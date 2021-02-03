@@ -56,11 +56,12 @@ class SocketController {
 
   checkDisconnectEvent(socketId) {
     this.users.deleteUser(socketId);
-    if (this.users.getCountUsers() < 2) {
+    if (this.users.getCountUsers() < 2 || !this.users.getPainter()) {
       this.sendStopGame(null, null, true);
       this.game.stop();
+    } else {
+      this.sendUsers();
     }
-    this.sendUsers();
   }
 
   checkDrawEvent(actionType, data, socket) {
@@ -119,6 +120,10 @@ class SocketController {
         this.chooseGameOption(socketId);
       }
     }
+    if (actionType === CONSTANTS.STOP_GAME) {
+      this.sendStopGame(null, data, true);
+      this.game.stop();
+    }
   }
 
   sendMessage(message, actionType, socket, socketEvent) {
@@ -156,7 +161,7 @@ class SocketController {
         loading: waitUsersFlag,
       }
       : {
-        winnerName: this.users.getUser(winnerSocketId).name,
+        winnerName: winnerSocketId ? this.users.getUser(winnerSocketId).name : undefined,
         guessWord,
       };
     this.sendDataInGameUsers('game', data, CONSTANTS.STOP_GAME);

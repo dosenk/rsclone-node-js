@@ -1,21 +1,14 @@
 const SOCKET_SERVER_URL = 'https://rsclone-node-js.herokuapp.com/';
-const INIT = 'INIT';
-const LOADING = 'LOADING';
-const LANG = 'LANG';
 const ROLE = 'ROLE';
 const ROLE_PAINTER = 'PAINTER';
 const ROLE_GUESSER = 'GUESSER';
 const NAME = 'NAME';
-const DRAW = 'DRAW';
 const USERS = 'USERS';
 const DRAW_THICKNESS = 'DRAW_THICKNESS';
 const DRAW_COLOR = 'DRAW_COLOR';
-const CLEAR_BOARD = 'CLEAR_BOARD';
 const DELETE_USERS = 'DELETE_USERS';
-
 const WORDS_TO_SELECT = 'WORDS_TO_SELECT';
 const WORD_TO_GUESS = 'WORD_TO_GUESS';
-
 const STOP_GAME = 'STOP_GAME';
 const START_GAME = 'START_GAME';
 const NEW_GAME = 'NEW_GAME';
