@@ -1,7 +1,3 @@
-// const createError = require('http-errors');
-// const logger = require('morgan');
-// import { SOCKET_SERVER_URL } from './constants/constants';
-
 const cors = require('cors');
 const express = require('express');
 

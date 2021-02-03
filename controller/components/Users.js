@@ -3,7 +3,7 @@ const CONSTANTS = require('../../constants/constants');
 
 class Users {
   constructor() {
-    this.allUsers = new Map(); // ключ socketId
+    this.allUsers = new Map();
   }
 
   addUser(name, socketId) {
@@ -35,7 +35,6 @@ class Users {
         }
       }
     });
-    // если painter не найден, то делаем всех игроков guesser и устанавливаем роли еще раз
     if (!isSetPainter) {
       this.setDefaultRole();
       this.setRoles();
